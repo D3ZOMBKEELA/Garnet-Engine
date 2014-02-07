@@ -1,6 +1,9 @@
 #ifndef _MODELCLASS_H_
 #define _MODECLASS_H_
 
+#include <fstream>
+using namespace std;
+
 #include "textureclass.h"
 
 class ModelClass
@@ -10,6 +13,14 @@ private:
 	{
 		D3DXVECTOR3 position;
 		D3DXVECTOR2 texture;
+		D3DXVECTOR3 normal;
+	};
+
+	struct ModelType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
 	};
 
 public:
@@ -17,7 +28,7 @@ public:
 	ModelClass(const ModelClass&);
 	~ModelClass();
 
-	bool Initialize(ID3D10Device*, WCHAR*);
+	bool Initialize(ID3D10Device*, char*, WCHAR*);
 	void Shutdown();
 	void Render(ID3D10Device*);
 
@@ -33,11 +44,14 @@ private:
 	bool LoadTexture(ID3D10Device*, WCHAR*);
 	void ReleaseTexture();
 
+	bool LoadModel(char*);
+	void ReleaseModel();
+
 private:
 	ID3D10Buffer *m_vertexBuffer, *m_indexBuffer;
 	int m_vertexCount, m_indexCount;
-
 	TextureClass *m_Texture;
+	ModelType *m_model;
 };
 
 #endif
