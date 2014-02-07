@@ -11,6 +11,7 @@ LightShaderClass::LightShaderClass()
 	m_projectionMatrixPtr = 0;
 	m_texturePtr = 0;
 
+	m_ambientColorPtr = 0;
 	m_lightDirectionPtr = 0;
 	m_diffuseColorPtr = 0;
 }
@@ -43,9 +44,9 @@ void LightShaderClass::Shutdown()
 	return;
 }
 
-void LightShaderClass::Render(ID3D10Device *device, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D10ShaderResourceView *texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 diffuseColor)
+void LightShaderClass::Render(ID3D10Device *device, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D10ShaderResourceView *texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)
 {
-	SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, diffuseColor);
+	SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, ambientColor, diffuseColor);
 
 	RenderShader(device, indexCount);
 
@@ -123,6 +124,7 @@ bool LightShaderClass::InitializeShader(ID3D10Device *device, HWND hwnd, WCHAR* 
 
 	m_texturePtr = m_effect->GetVariableByName("shaderTexture")->AsShaderResource();
 
+	m_ambientColorPtr = m_effect->GetVariableByName("ambientColor")->AsVector();
 	m_lightDirectionPtr = m_effect->GetVariableByName("lightDirection")->AsVector();
 	m_diffuseColorPtr = m_effect->GetVariableByName("diffuseColor")->AsVector();
 
@@ -131,6 +133,7 @@ bool LightShaderClass::InitializeShader(ID3D10Device *device, HWND hwnd, WCHAR* 
 
 void LightShaderClass::ShutdownShader()
 {
+	m_ambientColorPtr = 0;
 	m_lightDirectionPtr = 0;
 	m_diffuseColorPtr = 0;
 
@@ -184,7 +187,7 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob *errorMessage, HWND h
 	return;
 }
 
-void LightShaderClass::SetShaderParameters(D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D10ShaderResourceView *texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 diffuseColor)
+void LightShaderClass::SetShaderParameters(D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D10ShaderResourceView *texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)
 {
 	m_worldMatrixPtr->SetMatrix((float*)&worldMatrix);
 
@@ -193,6 +196,8 @@ void LightShaderClass::SetShaderParameters(D3DXMATRIX worldMatrix, D3DXMATRIX vi
 	m_projectionMatrixPtr->SetMatrix((float*)&projectionMatrix);
 
 	m_texturePtr->SetResource(texture);
+
+	m_ambientColorPtr->SetFloatVector((float*)&ambientColor);
 
 	m_lightDirectionPtr->SetFloatVector((float*)&lightDirection);
 

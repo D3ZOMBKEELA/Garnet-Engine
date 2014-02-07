@@ -3,6 +3,7 @@ matrix viewMatrix;
 matrix projectionMatrix;
 Texture2D shaderTexture;
 
+float4 ambientColor;
 float4 diffuseColor;
 float3 lightDirection;
 
@@ -55,11 +56,18 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 
 	textureColor = shaderTexture.Sample(SampleType, input.tex);
 
+	color = ambientColor;
+
 	lightDir = -lightDirection;
 
 	lightIntensity = saturate(dot(input.normal, lightDir));
 
-	color = saturate(diffuseColor * lightIntensity);
+	if(lightIntensity > 0.0F)
+	{
+	    color += (diffuseColor * lightIntensity);
+	}
+
+	color = saturate(color);
 
 	color = color * textureColor;
 
