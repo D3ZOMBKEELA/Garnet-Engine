@@ -7,6 +7,10 @@ float4 ambientColor;
 float4 diffuseColor;
 float3 lightDirection;
 
+float3 cameraPosition;
+float4 specularColor;
+float specularPower;
+
 SamplerState SampleType
 {
     Filter = MIN_MAG_MIP_LINEAR;
@@ -26,11 +30,13 @@ struct PixelInputType
     float4 position : SV_POSITION;
 	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
+	float3 viewDirection : TEXCOORD1;
 };
 
 PixelInputType LightVertexShader(VertexInputType input)
 {
     PixelInputType output;
+	float4 worldPosition;
 
 	input.position.w = 1.0F;
 
@@ -44,6 +50,12 @@ PixelInputType LightVertexShader(VertexInputType input)
 
 	output.normal = normalize(output.normal);
 
+	worldPosition = mul(input.position, worldMatrix);
+
+	output.viewDirection = cameraPosition.xyz - worldPosition.xyz;
+
+	output.viewDirection = normalize(output.viewDirection);
+
 	return output;
 }
 
@@ -53,10 +65,14 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 	float3 lightDir;
 	float lightIntensity;
 	float4 color;
+	float3 reflection;
+	float4 specular;
 
 	textureColor = shaderTexture.Sample(SampleType, input.tex);
 
 	color = ambientColor;
+
+	specular = float4(0.0F, 0.0F, 0.0F, 0.0F);
 
 	lightDir = -lightDirection;
 
@@ -65,11 +81,19 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 	if(lightIntensity > 0.0F)
 	{
 	    color += (diffuseColor * lightIntensity);
+
+		color = saturate(color);
+
+		reflection = normalize(2 * lightIntensity * input.normal - lightDir);
+
+		specular = pow(saturate(dot(reflection, input.viewDirection)), specularPower);
 	}
 
 	color = saturate(color);
 
 	color = color * textureColor;
+
+	color = saturate(color + specular);
 
 	return color;
 }

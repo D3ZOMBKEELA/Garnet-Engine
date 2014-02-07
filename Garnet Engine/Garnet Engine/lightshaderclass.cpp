@@ -14,6 +14,10 @@ LightShaderClass::LightShaderClass()
 	m_ambientColorPtr = 0;
 	m_lightDirectionPtr = 0;
 	m_diffuseColorPtr = 0;
+
+	m_cameraPositionPtr = 0;
+	m_specularColorPtr = 0;
+	m_specularPowerPtr = 0;
 }
 
 LightShaderClass::LightShaderClass(const LightShaderClass& other)
@@ -44,9 +48,9 @@ void LightShaderClass::Shutdown()
 	return;
 }
 
-void LightShaderClass::Render(ID3D10Device *device, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D10ShaderResourceView *texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)
+void LightShaderClass::Render(ID3D10Device *device, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D10ShaderResourceView *texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor, D3DXVECTOR3 cameraPosition, D3DXVECTOR4 specularColor, float specularPower)
 {
-	SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, ambientColor, diffuseColor);
+	SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, ambientColor, diffuseColor, cameraPosition, specularColor, specularPower);
 
 	RenderShader(device, indexCount);
 
@@ -128,11 +132,19 @@ bool LightShaderClass::InitializeShader(ID3D10Device *device, HWND hwnd, WCHAR* 
 	m_lightDirectionPtr = m_effect->GetVariableByName("lightDirection")->AsVector();
 	m_diffuseColorPtr = m_effect->GetVariableByName("diffuseColor")->AsVector();
 
+	m_cameraPositionPtr = m_effect->GetVariableByName("cameraPosition")->AsVector();
+	m_specularColorPtr = m_effect->GetVariableByName("specularColor")->AsVector();
+	m_specularPowerPtr = m_effect->GetVariableByName("specularPower")->AsScalar();
+
 	return true;
 }
 
 void LightShaderClass::ShutdownShader()
 {
+	m_cameraPositionPtr = 0;
+	m_specularColorPtr = 0;
+	m_specularPowerPtr = 0;
+
 	m_ambientColorPtr = 0;
 	m_lightDirectionPtr = 0;
 	m_diffuseColorPtr = 0;
@@ -187,7 +199,7 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob *errorMessage, HWND h
 	return;
 }
 
-void LightShaderClass::SetShaderParameters(D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D10ShaderResourceView *texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)
+void LightShaderClass::SetShaderParameters(D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D10ShaderResourceView *texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor, D3DXVECTOR3 cameraPosition, D3DXVECTOR4 specularColor, float specularPower)
 {
 	m_worldMatrixPtr->SetMatrix((float*)&worldMatrix);
 
@@ -202,6 +214,12 @@ void LightShaderClass::SetShaderParameters(D3DXMATRIX worldMatrix, D3DXMATRIX vi
 	m_lightDirectionPtr->SetFloatVector((float*)&lightDirection);
 
 	m_diffuseColorPtr->SetFloatVector((float*)&diffuseColor);
+
+	m_cameraPositionPtr->SetFloatVector((float*)&cameraPosition);
+
+	m_specularColorPtr->SetFloatVector((float*)&specularColor);
+
+	m_specularPowerPtr->SetFloat(specularPower);
 
 	return;
 }

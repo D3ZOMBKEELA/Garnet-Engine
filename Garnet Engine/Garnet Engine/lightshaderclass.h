@@ -15,14 +15,14 @@ public:
 
 	bool Initialize(ID3D10Device*, HWND);
 	void Shutdown();
-	void Render(ID3D10Device*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D10ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4);
+	void Render(ID3D10Device*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D10ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4, D3DXVECTOR3, D3DXVECTOR4, float);
 
 private:
 	bool InitializeShader(ID3D10Device*, HWND, WCHAR*);
 	void ShutdownShader();
 	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
 
-	void SetShaderParameters(D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D10ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4);
+	void SetShaderParameters(D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D10ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4, D3DXVECTOR3, D3DXVECTOR4, float);
 	void RenderShader(ID3D10Device*, int);
 
 private:
@@ -38,6 +38,10 @@ private:
 	ID3D10EffectVectorVariable *m_lightDirectionPtr;
 	ID3D10EffectVectorVariable *m_ambientColorPtr;
 	ID3D10EffectVectorVariable *m_diffuseColorPtr;
+
+	ID3D10EffectVectorVariable *m_cameraPositionPtr;
+	ID3D10EffectVectorVariable *m_specularColorPtr;
+	ID3D10EffectScalarVariable *m_specularPowerPtr;
 };
 
 #endif
